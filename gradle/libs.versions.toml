@@ -16,6 +16,7 @@ mlKitPose = "18.0.0-beta5"
 mlKitSubject = "16.0.0-beta1"
 room = "2.6.1"
 ksp = "2.0.0-1.0.21"
+material = "1.13.0"
 
 [libraries]
 # Core & UI
@@ -25,6 +26,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 # Dependency Injection (Hilt)
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
