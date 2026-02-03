@@ -63,6 +63,9 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
+    // 코루틴과 ListenableFuture를 연결해주는 핵심 라이브러리
+    implementation(libs.androidx.concurrent.futures.ktx)
+
     // CameraX
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)

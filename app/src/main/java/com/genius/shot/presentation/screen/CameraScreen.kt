@@ -1,50 +1,40 @@
 package com.genius.shot.presentation.screen
 
-import android.util.Log
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.Preview
-import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
+// package com.example.smartcamera.presentation.camera
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import com.genius.shot.presentation.camera.CameraPreview
+import com.genius.shot.viewmodel.CameraViewModel
 
 @Composable
-fun CameraScreen(
-    onGalleryClick: () -> Unit
-) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
-
-    // 카메라 초기화 로직
-    LaunchedEffect(Unit) {
-        val cameraProvider = ProcessCameraProvider.getInstance(context).get()
-        val preview = Preview.Builder().build().also {
-            it.setSurfaceProvider(previewView.surfaceProvider)
-        }
-
-        try {
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(
-                lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
-                preview
-            )
-        } catch (e: Exception) {
-            Log.e("CameraScreen", "Binding failed", e)
-        }
-    }
+fun CameraScreen(onGalleryClick: () -> Unit) {
+    val owner = checkNotNull(LocalViewModelStoreOwner.current)
+    val viewModel: CameraViewModel = hiltViewModel(viewModelStoreOwner = owner)
+    val uiState by viewModel.uiState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
+        // 프리뷰
+        CameraPreview(viewModel = viewModel, modifier = Modifier.fillMaxSize())
 
-        // 여기에 나중에 줌 제스처와 갤러리 버튼을 얹을 겁니다.
+        // 줌 수치 표시 (상단 중앙)
+        Text(
+            text = "Zoom: ${String.format("%.1f", uiState.currentZoom)}x",
+            color = Color.White,
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 60.dp)
+        )
+
+        // 여기에 촬영 버튼 등을 추가하면 됩니다.
     }
 }
