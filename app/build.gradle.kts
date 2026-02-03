@@ -85,4 +85,7 @@ dependencies {
     implementation(libs.mlkit.face.detection)
     implementation(libs.mlkit.pose.detection)
     implementation(libs.mlkit.subject.segmentation)
+
+    // Icons
+    implementation(libs.androidx.compose.material.icons.extended)
 }

@@ -63,6 +63,28 @@ class CameraViewModel @Inject constructor(
         }
     }
 
+    fun capturePhoto() {
+        // 이미 촬영 중이면 무시 (중복 클릭 방지)
+        if (uiState.value.isCapturing) return
+
+        viewModelScope.launch {
+            // 1. UI 상태 변경: 촬영 중 (로딩 표시 등) & 셔터 효과 트리거
+            _uiState.update { it.copy(isCapturing = true) }
+
+            try {
+                // 2. 촬영 수행 (비동기 대기)
+                val uri = cameraManager.takePhoto()
+
+                // 3. 성공 시: 썸네일 업데이트 및 촬영 상태 해제
+                _uiState.update { it.copy(lastThumbnail = uri, isCapturing = false) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 실패 시: 상태만 복구
+                _uiState.update { it.copy(isCapturing = false) }
+            }
+        }
+    }
+
     // CameraScreen에서 사용하기 위해 노출
     fun getManager() = cameraManager
 }
