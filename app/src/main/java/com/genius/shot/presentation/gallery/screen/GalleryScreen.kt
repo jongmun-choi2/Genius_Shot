@@ -1,5 +1,6 @@
 package com.genius.shot.presentation.gallery.screen
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,6 +46,7 @@ import com.genius.shot.presentation.gallery.viewmodel.GalleryViewModel
 @Composable
 fun GalleryScreen(
     onBackClick: () -> Unit,
+    onImageClick: (Uri) -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
 
@@ -131,7 +133,7 @@ fun GalleryScreen(
                     ) { index ->
                         when( val item = pagingItems[index]) {
                             is GalleryItem.DateHeader -> DateHeader(date = item.date)
-                            is GalleryItem.Image -> GalleryImageItem(image = item, onClick = {})
+                            is GalleryItem.Image -> GalleryImageItem(image = item, onClick = { onImageClick(item.item.uri) })
                             null -> {
                                 Box(
                                     modifier = Modifier.aspectRatio(1f).background(Color.LightGray)

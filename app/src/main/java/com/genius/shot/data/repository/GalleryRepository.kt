@@ -1,6 +1,8 @@
 package com.genius.shot.data.repository
 
 import android.content.Context
+import android.net.Uri
+import androidx.core.net.toUri
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -25,6 +27,15 @@ class GalleryRepository @Inject constructor(
             ),
             pagingSourceFactory = { ImagePagingSource(context.contentResolver) }
         ).flow
+    }
+
+    fun deleteImage(uri : Uri) {
+        try {
+            val resolver = context.contentResolver
+            resolver.delete(uri, null, null)
+        }catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 
 }
