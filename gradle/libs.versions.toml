@@ -19,6 +19,7 @@ mlKitSubject = "16.0.0-beta1"
 room = "2.6.1"
 ksp = "2.0.0-1.0.21"
 material = "1.13.0"
+foundationLayout = "1.10.2"
 
 [libraries]
 # Core & UI
@@ -56,6 +57,7 @@ glide-compiler = { group = "com.github.bumptech.glide", name = "compiler", versi
 mlkit-face-detection = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlKitFace" }
 mlkit-pose-detection = { group = "com.google.mlkit", name = "pose-detection", version.ref = "mlKitPose" }
 mlkit-subject-segmentation = { group = "com.google.android.gms", name = "play-services-mlkit-subject-segmentation", version.ref = "mlKitSubject" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -5,8 +5,13 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import com.genius.shot.presentation.component.PermissionWrapper
-import com.genius.shot.presentation.screen.CameraScreen
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.genius.shot.presentation.camera.component.PermissionWrapper
+import com.genius.shot.presentation.camera.screen.CameraScreen
+import com.genius.shot.presentation.gallery.screen.GalleryScreen
 import com.genius.shot.ui.theme.GeniusShotTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,14 +26,33 @@ class MainActivity : ComponentActivity() {
             GeniusShotTheme {
                 PermissionWrapper {
                     // 메인 화면으로 CameraScreen 호출
-                    CameraScreen(
-                        onGalleryClick = {
-                            // TODO: 갤러리 화면으로 이동하는 Navigation 로직
-                            Log.d("MainActivity", "Gallery Clicked")
-                        }
-                    )
+                    GeniusShotAppNavHost()
                 }
             }
         }
+    }
+}
+
+@Composable
+fun GeniusShotAppNavHost() {
+    val navController = rememberNavController()
+
+    NavHost(navController = navController, startDestination = "camera_route") {
+        composable("camera_route") {
+            CameraScreen(
+                onGalleryClick = {
+                    navController.navigate("gallery_route")
+                }
+            )
+        }
+
+        composable("gallery_route") {
+            GalleryScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
     }
 }

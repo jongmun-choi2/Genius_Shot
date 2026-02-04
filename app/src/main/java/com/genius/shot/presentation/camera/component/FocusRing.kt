@@ -1,4 +1,4 @@
-package com.genius.shot.presentation.component
+package com.genius.shot.presentation.camera.component
 
 
 import android.graphics.PointF
