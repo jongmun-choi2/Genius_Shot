@@ -1,6 +1,14 @@
 package com.genius.shot.presentation.gallery.screen
 
+import android.app.Activity
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,14 +32,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -39,6 +56,7 @@ import androidx.paging.compose.itemKey
 import com.genius.shot.domain.model.GalleryItem
 import com.genius.shot.presentation.gallery.component.DateHeader
 import com.genius.shot.presentation.gallery.component.GalleryImageItem
+import com.genius.shot.presentation.gallery.component.SelectionTopAppBar
 import com.genius.shot.presentation.gallery.viewmodel.GalleryViewModel
 
 
@@ -51,20 +69,69 @@ fun GalleryScreen(
 ) {
 
     val pagingItems: LazyPagingItems<GalleryItem> = viewModel.galleryData.collectAsLazyPagingItems()
+    val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
+    val isSelectionMode = selectedItems.isNotEmpty()
+    val context = LocalContext.current
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    BackHandler(enabled = isSelectionMode) {
+        viewModel.clearSelection()
+    }
+
+    val intentSenderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // 사용자가 "허용"을 눌렀음 -> 다시 삭제 시도
+            viewModel.onDeletePermissionGranted()
+        }
+    }
+
+    // ✨ 2. 뷰모델에서 권한 요청 이벤트가 오면 런처 실행
+    LaunchedEffect(Unit) {
+        viewModel.permissionNeededEvent.collect { intentSender ->
+            val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
+            intentSenderLauncher.launch(intentSenderRequest)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.refreshEvent.collect {
+            pagingItems.refresh() // PagingSource를 다시 실행시킴 (UI 갱신)
+        }
+    }
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("갤러리") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "뒤로가기"
-                        )
+            if(isSelectionMode) {
+                SelectionTopAppBar(
+                    selectionCount = selectedItems.size,
+                    onClear = { viewModel.clearSelection() },
+                    onShare = {
+                        val uris = ArrayList(selectedItems.map { it.uri })
+                        val shareIntent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                            type = "image/*"
+                            putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "사진 공유"))
+                    },
+                    onDelete = { showDeleteDialog = true }
+                )
+            }else {
+                CenterAlignedTopAppBar(
+                    title = { Text("갤러리") },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "뒤로가기"
+                            )
+                        }
                     }
-                }
-            )
+                )
+            }
         }
     ) { paddingValues ->
 
@@ -133,7 +200,13 @@ fun GalleryScreen(
                     ) { index ->
                         when( val item = pagingItems[index]) {
                             is GalleryItem.DateHeader -> DateHeader(date = item.date)
-                            is GalleryItem.Image -> GalleryImageItem(image = item, onClick = { onImageClick(item.item.uri) })
+                            is GalleryItem.Image -> GalleryImageItem(
+                                image = item,
+                                isSelectionMode = isSelectionMode,
+                                isSelected = selectedItems.contains(item.item),
+                                onClick = { onImageClick(item.item.uri) },
+                                onLongClick = {viewModel.toggleSelection(item.item)}
+                            )
                             null -> {
                                 Box(
                                     modifier = Modifier.aspectRatio(1f).background(Color.LightGray)
@@ -146,9 +219,29 @@ fun GalleryScreen(
 
         }
 
+    }
 
-
-
+    if(showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("${selectedItems.size}장의 사진 삭제") },
+            text = { Text("선택한 사진을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.deleteSelectedItems()
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("삭제", color = Color.Red)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("취소")
+                }
+            }
+        )
     }
 
 }

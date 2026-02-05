@@ -1,8 +1,12 @@
 package com.genius.shot.presentation.gallery.screen
 
 
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
@@ -66,9 +70,21 @@ fun DetailScreen(
     var offset by remember {mutableStateOf(Offset.Zero)}
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        viewModel.deleteEvent.collect {
+    val intentSenderLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            // 사용자가 "허용"을 눌렀음 -> 다시 삭제 시도
+            viewModel.onDeleteSuccess()
             onBackClick()
+        }
+    }
+
+    // ✨ 2. 뷰모델에서 권한 요청 이벤트가 오면 런처 실행
+    LaunchedEffect(Unit) {
+        viewModel.permissionNeededEvent.collect { intentSender ->
+            val intentSenderRequest = IntentSenderRequest.Builder(intentSender).build()
+            intentSenderLauncher.launch(intentSenderRequest)
         }
     }
 
@@ -98,7 +114,7 @@ fun DetailScreen(
                         Icon(Icons.Default.Share, "Share", tint = Color.White)
                     }
 
-                    IconButton(onClick = { showDeleteDialog = true }) {
+                    IconButton(onClick = { viewModel.deleteImage(imageUri) }) {
                         Icon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = "Delete",
@@ -147,30 +163,6 @@ fun DetailScreen(
                     )
             )
         }
-
-        if (showDeleteDialog) {
-            AlertDialog(
-                onDismissRequest = { showDeleteDialog = false },
-                title = { Text("사진 삭제") },
-                text = { Text("이 사진을 삭제하시겠습니까?") },
-                confirmButton = {
-                    TextButton(
-                        onClick = {
-                            showDeleteDialog = false
-                            viewModel.deleteImage(imageUri)
-                        }
-                    ) {
-                        Text("삭제", color = Color.Red)
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { showDeleteDialog = false }) {
-                        Text("취소")
-                    }
-                }
-            )
-        }
-
     }
 
 }
