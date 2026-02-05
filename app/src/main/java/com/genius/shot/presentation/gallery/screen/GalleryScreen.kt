@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -30,6 +31,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,6 +67,7 @@ import com.genius.shot.presentation.gallery.viewmodel.GalleryViewModel
 fun GalleryScreen(
     onBackClick: () -> Unit,
     onImageClick: (Uri) -> Unit,
+    onCleanClick: () -> Unit,
     viewModel: GalleryViewModel = hiltViewModel()
 ) {
 
@@ -117,7 +120,7 @@ fun GalleryScreen(
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "사진 공유"))
                     },
-                    onDelete = { showDeleteDialog = true }
+                    onDelete = { viewModel.deleteSelectedItems() }
                 )
             }else {
                 CenterAlignedTopAppBar(
@@ -127,6 +130,15 @@ fun GalleryScreen(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                                 contentDescription = "뒤로가기"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = onCleanClick) {
+                            Icon(
+                                imageVector = Icons.Default.CleaningServices,
+                                contentDescription = "중복 사진 정리",
+                                tint = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -219,29 +231,6 @@ fun GalleryScreen(
 
         }
 
-    }
-
-    if(showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("${selectedItems.size}장의 사진 삭제") },
-            text = { Text("선택한 사진을 모두 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        viewModel.deleteSelectedItems()
-                        showDeleteDialog = false
-                    }
-                ) {
-                    Text("삭제", color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("취소")
-                }
-            }
-        )
     }
 
 }

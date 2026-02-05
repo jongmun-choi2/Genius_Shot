@@ -14,6 +14,7 @@ import androidx.navigation.navArgument
 import com.genius.shot.presentation.camera.component.PermissionWrapper
 import com.genius.shot.presentation.camera.screen.CameraScreen
 import com.genius.shot.presentation.gallery.screen.DetailScreen
+import com.genius.shot.presentation.gallery.screen.DuplicateCheckScreen
 import com.genius.shot.presentation.gallery.screen.GalleryScreen
 import com.genius.shot.ui.theme.GeniusShotTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,6 +59,9 @@ fun GeniusShotAppNavHost() {
                 onImageClick = { uri ->
                     val imagePath = URLEncoder.encode(uri.toString(), "UTF-8")
                     navController.navigate("detail_route/$imagePath")
+                },
+                onCleanClick = {
+                    navController.navigate("duplicate_check_route")
                 }
             )
         }
@@ -69,6 +73,14 @@ fun GeniusShotAppNavHost() {
             val imagePath = backStackEntry.arguments?.getString("imagePath") ?: ""
             DetailScreen(
                 imagePath = imagePath,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = "duplicate_check_route") {
+            DuplicateCheckScreen(
                 onBackClick = {
                     navController.popBackStack()
                 }
