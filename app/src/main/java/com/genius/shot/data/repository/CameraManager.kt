@@ -1,4 +1,4 @@
-package com.genius.shot.repository
+package com.genius.shot.data.repository
 
 import android.content.ContentValues
 import android.content.Context
@@ -7,10 +7,16 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import androidx.camera.core.*
+import androidx.camera.core.Camera
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.concurrent.futures.await
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -37,7 +43,7 @@ class CameraManager @Inject constructor(
     val zoomRatio = _zoomRatio.asStateFlow()
 
     suspend fun getCameraProvider(): ProcessCameraProvider {
-        return ProcessCameraProvider.getInstance(context).await()
+        return ProcessCameraProvider.Companion.getInstance(context).await()
     }
 
     suspend fun takePhoto(): Uri = suspendCancellableCoroutine { continuation ->
@@ -59,13 +65,20 @@ class CameraManager @Inject constructor(
             // ✨ 핵심 변경 사항: DCIM 폴더 아래 날짜 폴더 생성
             if (Build.VERSION.SDK_INT > Build.VERSION_CODES.P) {
                 // 결과: DCIM/2026-02-03/파일.jpg
-                put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_DCIM}/$dateFolder")
+                put(
+                    MediaStore.Images.Media.RELATIVE_PATH,
+                    "${Environment.DIRECTORY_DCIM}/$dateFolder"
+                )
                 put(MediaStore.Images.Media.IS_PENDING, 1)
             }
         }
 
         val outputOptions = ImageCapture.OutputFileOptions
-            .Builder(context.contentResolver, MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            .Builder(
+                context.contentResolver,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                contentValues
+            )
             .build()
 
         imageCapture.takePicture(
@@ -95,7 +108,7 @@ class CameraManager @Inject constructor(
     }
 
     fun bindUseCases(
-        lifecycleOwner: androidx.lifecycle.LifecycleOwner,
+        lifecycleOwner: LifecycleOwner,
         cameraProvider: ProcessCameraProvider,
         preview: Preview,
         imageCapture: ImageCapture

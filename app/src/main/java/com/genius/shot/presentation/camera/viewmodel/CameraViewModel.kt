@@ -1,4 +1,4 @@
-package com.genius.shot.viewmodel
+package com.genius.shot.presentation.camera.viewmodel
 
 // package com.example.smartcamera.presentation.camera
 
@@ -7,14 +7,12 @@ import androidx.camera.core.FocusMeteringAction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.genius.shot.domain.model.CameraUiState
-import com.genius.shot.repository.CameraManager
+import com.genius.shot.data.repository.CameraManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(

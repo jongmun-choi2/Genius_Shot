@@ -1,4 +1,4 @@
-package com.genius.shot.presentation.dialog
+package com.genius.shot.presentation.camera.dialog
 
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
@@ -44,7 +44,7 @@ fun RationaleDialog(onConfirm: () -> Unit) {
 }
 
 @Composable
-fun SettingsDialog(onConfirm: () -> Unit) {
+fun SettingsDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     CameraSystemDialog(
         title = "권한 설정 필요",
         text = "카메라 권한이 거부되어 기능을 사용할 수 없습니다. 설정 화면에서 권한을 허용해 주세요.",

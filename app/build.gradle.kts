@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "com.genius.shot"
-        minSdk = 24
+        minSdk = 32
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -47,6 +47,7 @@ android {
             isIncludeAndroidResources = true
         }
     }
+
 }
 
 dependencies {
@@ -60,6 +61,8 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.androidx.compose.foundation.layout)
+    implementation(libs.androidx.compose.ui.graphics)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 

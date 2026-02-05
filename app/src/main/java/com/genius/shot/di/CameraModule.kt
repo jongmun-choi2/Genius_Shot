@@ -1,7 +1,7 @@
 package com.genius.shot.di
 
 import android.content.Context
-import com.genius.shot.repository.CameraManager
+import com.genius.shot.data.repository.CameraManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

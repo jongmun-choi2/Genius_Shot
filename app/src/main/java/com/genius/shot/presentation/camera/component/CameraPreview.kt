@@ -1,4 +1,4 @@
-package com.genius.shot.presentation.camera
+package com.genius.shot.presentation.camera.component
 
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
@@ -15,8 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.genius.shot.presentation.component.FocusRing
-import com.genius.shot.viewmodel.CameraViewModel
+import com.genius.shot.presentation.camera.viewmodel.CameraViewModel
 
 @Composable
 fun CameraPreview(
