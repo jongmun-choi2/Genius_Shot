@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "496073851881",
+    "project_id": "geniusshot-821ef",
+    "storage_bucket": "geniusshot-821ef.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:496073851881:android:0c230c65d5eb6f90ed8178",
+        "android_client_info": {
+          "package_name": "com.genius.shot"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjxoKyaVFe5qeAKiC3Bq8dDtjjJVyY8XA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

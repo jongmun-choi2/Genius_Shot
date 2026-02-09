@@ -10,4 +10,7 @@ plugins {
     // 3. Kotlin 및 Hilt 플러그인
     alias(libs.plugins.hilt.android) apply false
     alias(libs.plugins.ksp) apply false
+    // ✨ [추가] Firebase 관련 플러그인 등록
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }

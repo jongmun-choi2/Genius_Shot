@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
@@ -98,4 +100,10 @@ dependencies {
 
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
+
+    // ✨ [추가] Firebase 의존성
+    // BOM을 사용하면 개별 라이브러리 버전을 적지 않아도 자동으로 맞춰줍니다.
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics) // 크래시 분석에 사용자 통계가 도움됨
 }
