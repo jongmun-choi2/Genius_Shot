@@ -11,10 +11,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.genius.shot.presentation.analyze.screen.DuplicateCheckScreen
 import com.genius.shot.presentation.camera.component.PermissionWrapper
 import com.genius.shot.presentation.camera.screen.CameraScreen
 import com.genius.shot.presentation.gallery.screen.DetailScreen
-import com.genius.shot.presentation.gallery.screen.DuplicateCheckScreen
 import com.genius.shot.presentation.gallery.screen.GalleryScreen
 import com.genius.shot.ui.theme.GeniusShotTheme
 import dagger.hilt.android.AndroidEntryPoint
