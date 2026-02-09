@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.foundation)
+    implementation(libs.play.services.ads.api)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 

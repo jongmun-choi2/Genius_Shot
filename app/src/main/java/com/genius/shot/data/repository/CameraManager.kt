@@ -111,7 +111,8 @@ class CameraManager @Inject constructor(
         lifecycleOwner: LifecycleOwner,
         cameraProvider: ProcessCameraProvider,
         preview: Preview,
-        imageCapture: ImageCapture
+        imageCapture: ImageCapture,
+        cameraSelector: CameraSelector
     ) {
 
         this.imageCapture = imageCapture
@@ -120,7 +121,7 @@ class CameraManager @Inject constructor(
             cameraProvider.unbindAll()
             camera = cameraProvider.bindToLifecycle(
                 lifecycleOwner,
-                CameraSelector.DEFAULT_BACK_CAMERA,
+                cameraSelector,
                 preview,
                 imageCapture
             )

@@ -1,5 +1,6 @@
 package com.genius.shot.presentation.camera.component
 
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.Preview
@@ -27,14 +28,17 @@ fun CameraPreview(
     val previewView = remember { PreviewView(context) }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     // 1. 카메라 바인딩
-    LaunchedEffect(Unit) {
+    LaunchedEffect(uiState.lensFacing) {
         val manager = viewModel.getManager()
         val provider = manager.getCameraProvider()
         val preview = Preview.Builder().build().apply {
             setSurfaceProvider(previewView.surfaceProvider)
         }
         val imageCapture = ImageCapture.Builder().build()
-        manager.bindUseCases(lifecycleOwner, provider, preview, imageCapture)
+
+        val cameraSelector = CameraSelector.Builder().requireLensFacing(uiState.lensFacing).build()
+
+        manager.bindUseCases(lifecycleOwner, provider, preview, imageCapture, cameraSelector)
     }
 
 
