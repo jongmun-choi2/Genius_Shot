@@ -2,6 +2,7 @@ package com.genius.shot.presentation.camera.viewmodel
 
 import android.graphics.PointF
 import android.net.Uri
+import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -39,6 +40,19 @@ class CameraViewModel @Inject constructor(
         cameraManager.zoomRatio
             .onEach { zoom -> _uiState.update { it.copy(currentZoom = zoom) } }
             .launchIn(viewModelScope)
+    }
+
+    // ✨ [추가] 카메라 전환 로직
+    fun toggleCamera() {
+        val currentLens = _uiState.value.lensFacing
+        val newLens = if (currentLens == CameraSelector.LENS_FACING_BACK) {
+            CameraSelector.LENS_FACING_FRONT
+        } else {
+            CameraSelector.LENS_FACING_BACK
+        }
+
+        // 상태 업데이트 -> UI가 감지하고 재연결 시도함
+        _uiState.update { it.copy(lensFacing = newLens) }
     }
 
     fun onZoom(scale: Float) {
