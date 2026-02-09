@@ -39,55 +39,9 @@ class DuplicateAnalyzer @Inject constructor(@ApplicationContext private val cont
             .build()
     )
 
-    fun loadBitmap(uri: Uri): Bitmap? {
-        return try {
-            val contentResolver = context.contentResolver
 
-            // 1. 이미지 크기만 먼저 읽기 (메모리 할당 X)
-            val options = BitmapFactory.Options().apply {
-                inJustDecodeBounds = true
-            }
 
-            // InputStream을 열어서 크기 확인
-            contentResolver.openInputStream(uri)?.use { stream ->
-                BitmapFactory.decodeStream(stream, null, options)
-            }
 
-            // 2. 샘플링 사이즈 계산 (목표: 640px 이하로 줄이기)
-            // ML Kit는 480~640px 정도면 충분히 인식합니다.
-            options.inSampleSize = calculateInSampleSize(options, 640, 640)
-            options.inJustDecodeBounds = false // 이제 진짜로 읽기
-
-            // 3. 리사이징하여 로드
-            contentResolver.openInputStream(uri)?.use { stream ->
-                BitmapFactory.decodeStream(stream, null, options)
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
-    }
-
-    // ✨ 구글 권장 리사이징 계산 로직
-    private fun calculateInSampleSize(
-        options: BitmapFactory.Options,
-        reqWidth: Int,
-        reqHeight: Int
-    ): Int {
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
-        var inSampleSize = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight: Int = height / 2
-            val halfWidth: Int = width / 2
-
-            // 목표 크기보다 클 때까지 계속 2배씩 줄임
-            while (halfHeight / inSampleSize >= reqHeight && halfWidth / inSampleSize >= reqWidth) {
-                inSampleSize *= 2
-            }
-        }
-        return inSampleSize
-    }
 
     suspend fun analyzeImage(uri: Uri, bitmap: Bitmap, dateTaken: Long) : ImageAnalysisResult {
         return withContext(Dispatchers.IO) {
