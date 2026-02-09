@@ -25,6 +25,7 @@ foundationLayout = "1.10.2"
 tensorflowLiteTaskVision = "0.4.4"
 uiGraphics = "1.10.2"
 foundation = "1.10.2"
+playServicesAdsApi = "24.9.0"
 
 [libraries]
 # Core & UI
@@ -68,6 +69,7 @@ androidx-compose-foundation-layout = { group = "androidx.compose.foundation", na
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics", version.ref = "uiGraphics" }
 tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

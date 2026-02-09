@@ -56,6 +56,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import com.genius.shot.domain.model.GalleryItem
+import com.genius.shot.presentation.ad.AdBanner
 import com.genius.shot.presentation.gallery.component.DateHeader
 import com.genius.shot.presentation.gallery.component.GalleryImageItem
 import com.genius.shot.presentation.gallery.component.SelectionTopAppBar
@@ -75,8 +76,6 @@ fun GalleryScreen(
     val selectedItems by viewModel.selectedItems.collectAsStateWithLifecycle()
     val isSelectionMode = selectedItems.isNotEmpty()
     val context = LocalContext.current
-
-    var showDeleteDialog by remember { mutableStateOf(false) }
 
     BackHandler(enabled = isSelectionMode) {
         viewModel.clearSelection()
@@ -143,6 +142,15 @@ fun GalleryScreen(
                         }
                     }
                 )
+            }
+        },
+        bottomBar = {
+            // 선택 모드가 아닐 때만 광고를 보여주는 것이 UX상 좋습니다.
+            // (선택 모드일 때는 삭제/공유 버튼이 중요하니까요)
+            if (!isSelectionMode) {
+                // 위에서 만든 AdBanner 컴포저블 호출
+                // (import 필요: com.genius.shot.presentation.gallery.component.AdBanner)
+                AdBanner()
             }
         }
     ) { paddingValues ->

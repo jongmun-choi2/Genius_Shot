@@ -1,7 +1,13 @@
 package com.genius.shot
 
 import android.app.Application
+import com.google.android.gms.ads.MobileAds
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
-class GeniusShotApplication : Application()
+class GeniusShotApplication : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        MobileAds.initialize(this)
+    }
+}
