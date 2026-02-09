@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.compose.foundation.layout)
     implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.foundation)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
@@ -88,6 +89,11 @@ dependencies {
     implementation(libs.mlkit.face.detection)
     implementation(libs.mlkit.pose.detection)
     implementation(libs.mlkit.subject.segmentation)
+    implementation(libs.mlkit.obj.detection)
+    // 구글의 선행 학습된 모델을 이용해 이미지를 벡터로 변환합니다.
+    implementation(libs.tensorflow.lite.task.vision)
+
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Icons
     implementation(libs.androidx.compose.material.icons.extended)
