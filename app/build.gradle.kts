@@ -24,12 +24,36 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+        getByName("release") {
+            signingConfig = signingConfigs.getByName("debug")
+        }
+        buildTypes {
+            debug {
+                // ✨ 2. 개발 버전 전용 설정
+                // 패키지명 뒤에 .dev가 붙어서 운영 앱과 동시에 설치 가능해짐
+
+                // 버전 이름 뒤에 -DEV가 붙음 (예: 1.0-DEV)
+                versionNameSuffix = "-DEV"
+
+                // 코드에서 쓸 수 있는 상수 (IS_DEV = true)
+                buildConfigField("boolean", "IS_DEV", "true")
+
+                // (선택) 앱 이름도 다르게 표시하려면 resValue 사용
+                // resValue("string", "app_name", "Genius Shot (Dev)")
+            }
+
+            release {
+                // ✨ 3. 운영 버전 설정
+                isDebuggable = false
+                isMinifyEnabled = false
+                proguardFiles(
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
+                )
+
+                // 코드에서 쓸 수 있는 상수 (IS_DEV = false)
+                buildConfigField("boolean", "IS_DEV", "false")
+            }
         }
     }
 
@@ -39,6 +63,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = libs.versions.composeBom.get()
