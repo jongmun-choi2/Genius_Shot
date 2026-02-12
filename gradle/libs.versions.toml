@@ -26,7 +26,9 @@ tensorflowLiteTaskVision = "0.4.4"
 uiGraphics = "1.10.2"
 foundation = "1.10.2"
 playServicesAdsApi = "24.9.0"
-
+googleServices = "4.4.4"
+firebaseCrashlyticsPlugin = "3.0.6"
+firebaseBom = "34.9.0" # BOM을 쓰면 라이브러리 버전 호환성 고민 끝!
 [libraries]
 # Core & UI
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -70,7 +72,10 @@ androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graph
 tensorflow-lite-task-vision = { module = "org.tensorflow:tensorflow-lite-task-vision", version.ref = "tensorflowLiteTaskVision" }
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 play-services-ads-api = { group = "com.google.android.gms", name = "play-services-ads-api", version.ref = "playServicesAdsApi" }
-
+# Firebase BOM (Bill of Materials)
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 # 라이브러리 모듈을 안 쓸 거라면 아래 줄은 없어도 됩니다.
@@ -80,3 +85,5 @@ hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
