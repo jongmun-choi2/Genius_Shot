@@ -4,7 +4,6 @@ import android.content.IntentSender
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.genius.shot.data.repository.GalleryRepository
 import com.genius.shot.domain.usecase.DeleteImageUseCase
 import com.genius.shot.domain.usecase.NotifyDataChangeUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
