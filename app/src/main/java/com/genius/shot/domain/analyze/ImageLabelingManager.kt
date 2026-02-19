@@ -15,25 +15,23 @@ import javax.inject.Singleton
 class ImageLabelingManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
-    // 정확도 70% 이상인 태그만 가져오기
-    private val options = ImageLabelerOptions.Builder()
-        .setConfidenceThreshold(0.7f)
-        .build()
+    // 기본 옵션 설정
+    private val options = ImageLabelerOptions.DEFAULT_OPTIONS // 또는 Builder로 생성
 
-    private val labeler = ImageLabeling.getClient(options)
+    // NPE 방지를 위해 직접 getClient를 호출하는 함수로 관리
+    private fun getLabeler() = ImageLabeling.getClient(options)
 
-    /**
-     * 이미지에서 키워드(라벨) 리스트 추출
-     */
     suspend fun getLabels(uri: Uri): List<String> {
         return try {
             val image = InputImage.fromFilePath(context, uri)
-            val labels = labeler.process(image).await()
-            Log.i("GeniusShot","tag = ${labels.map { it.text }}")
-            labels.map { it.text }
 
+            // 💡 getClient 호출 시점에 의존성 문제가 있으면 여기서 catch 됩니다.
+            val labels = getLabeler().process(image).await()
+
+            Log.i("GeniusShot", "Tags found: ${labels.map { it.text }}")
+            labels.map { it.text }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("GeniusShot", "Labeling NPE or Error for $uri", e)
             emptyList()
         }
     }
