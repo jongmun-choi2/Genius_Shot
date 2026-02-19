@@ -1,42 +1,50 @@
-# 📸 Genius Shot (지니어스 샷)
+# 📸 Genius Shot (Genius Shot)
 
-**Genius Shot**은 AI 기술을 활용하여 사용자의 사진 촬영을 돕고, 갤러리에 쌓인 중복 사진을 스마트하게 정리해 주는 지능형 카메라 & 갤러리 애플리케이션입니다.
+**Genius Shot**은 AI 기술을 활용하여 갤러리의 사진을 자동으로 분석하고, 스마트하게 정리 및 검색할 수 있도록 돕는 안드로이드 애플리케이션입니다. 사용자가 잠든 사이 AI가 사진을 라벨링하여, 원하는 사진을 키워드만으로 즉시 찾아낼 수 있습니다.
 
 ## ✨ 주요 기능 (Key Features)
 
-### 1. 📷 스마트 카메라 (Smart Camera)
-- **CameraX 기반 고성능 촬영:** 빠르고 안정적인 촬영 경험 제공
-- **전면/후면 전환:** 원터치로 셀피 모드와 후면 카메라 전환 가능
-- **줌 & 포커스:**
-    - 핀치 투 줌 (Pinch-to-Zoom) 지원
-    - 탭 투 포커스 (Tap-to-Focus) 및 포커스 링 UI
-- **흔들림 감지:** 촬영 직후 사진의 선명도(Laplacian Variance)를 분석하여, 흔들린 사진일 경우 재촬영 팝업 노출
+### 🔍 AI 스마트 검색 (Smart Search)
+* **키워드 기반 검색**: "고양이", "바다", "음식" 등 사진 속 객체를 키워드로 검색하여 즉시 찾아낼 수 있습니다.
+* **다국어 자동 번역**: 한국어로 검색해도 내부적으로 영어 라벨과 매칭하여 정확한 결과를 제공합니다.
+* **초고속 응답**: 분석된 데이터가 로컬 Room DB에 최적화되어 있어 수만 장의 사진도 순식간에 검색합니다.
 
-### 2. 🤖 AI 분석 및 정리 (Smart Analysis)
-- **중복 사진 그룹화:**
-    - **Pose Detection (ML Kit):** 사람의 포즈 유사도를 분석하여 같은 자세의 사진을 식별
-    - **Local Difference Analysis:** 배경 및 미세한 움직임을 격자(Grid) 단위로 분석하여 정교한 중복 판별
-- **베스트 샷 추천:** 흔들림이 가장 적고 구도가 안정적인 사진을 자동으로 '남김'으로 추천
+### 🤖 자동 이미지 라벨링 (Auto Labeling)
+* **ML Kit 통합**: Google의 온디바이스 머신러닝 기술을 사용하여 외부 서버 전송 없이 안전하게 사진을 분석합니다.
+* **백그라운드 처리**: 앱을 사용하지 않는 시간에도 WorkManager를 통해 새로운 사진을 지속적으로 분석합니다.
 
-### 3. 🖼️ 갤러리 및 관리 (Gallery Management)
-- **날짜별 그룹화:** 촬영 날짜별로 사진을 깔끔하게 분류하여 표시 (Paging 3 적용)
-- **다중 선택 모드:** 터치 & 드래그 또는 롱 클릭으로 여러 사진을 손쉽게 선택
-- **삭제 및 공유:**
-    - Android 10+ 범위 지정 저장소(Scoped Storage) 대응 삭제 로직 (권한 요청 처리)
-    - 다중 이미지 공유 기능 (Intent)
+### 🔋 스마트 스케줄링 (Smart Scheduling)
+* **새벽 시간대 동작**: 시스템 자원을 많이 사용하는 분석 작업은 사용자가 잠든 새벽(03:00 ~ 05:00)에 실행됩니다.
+* **최적의 실행 조건**: 배터리 소모를 방지하기 위해 '충전 중' 및 '기기 유휴 상태'일 때만 동작하도록 설계되었습니다.
 
-## 🛠 기술 스택 (Tech Stack)
+### 📂 효율적인 갤러리 관리
+* **날짜별 그룹화**: 사진을 촬영 날짜별로 깔끔하게 분류하여 보여줍니다.
+* **다중 선택 및 삭제**: 여러 장의 사진을 한꺼번에 선택하여 공유하거나 안전하게 삭제할 수 있습니다.
+* **중복 사진 스캔**: 유사하거나 중복된 사진을 찾아내어 저장 공간을 효율적으로 확보할 수 있도록 돕습니다.
 
-### Architecture
-- **Language:** Kotlin
-- **UI Framework:** Jetpack Compose (Material 3)
-- **Pattern:** MVVM (Model-View-ViewModel) + Clean Architecture
-- **DI:** Hilt (Dagger)
-- **Async:** Coroutines & Flow
+---
 
-### Libraries
-- **Camera:** CameraX (Core, Camera2, Lifecycle, View)
-- **Image Loading:** Glide (Compose Integration)
-- **List:** Paging 3 (Infinite Scroll)
-- **AI/ML:** Google ML Kit (Pose Detection), TensorFlow Lite
-- **Ads:** Google AdMob
+## ✨ 최근 업데이트 사항 (v1.1)
+* **Clean Architecture 도입**: Domain, Data, Presentation 계층 분리로 안정성 강화
+* **검색 성능 최적화**: Room DB 인덱싱 및 필터링 로직 개선
+* **백그라운드 워커 개선**: 특정 시간대 실행 및 제약 조건 추가
+
+---
+
+## 🛠 기술 스택
+| 분류 | 기술 |
+| :--- | :--- |
+| **Language** | Kotlin (2.1.0) |
+| **UI Framework** | Jetpack Compose |
+| **Architecture** | Clean Architecture, MVVM Pattern |
+| **Database** | Room (2.8.4) |
+| **DI** | Hilt (2.59.1) |
+| **AI/ML** | Google ML Kit (Image Labeling, Translation) |
+| **Jetpack** | WorkManager, Paging3, ViewModel |
+
+---
+
+## 🚀 시작하기
+1. **저장소 클론**
+   ```bash
+   git clone [https://github.com/jongmun-choi2/genius_shot.git](https://github.com/jongmun-choi2/genius_shot.git)
