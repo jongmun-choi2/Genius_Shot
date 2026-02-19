@@ -1,34 +1,41 @@
 [versions]
 agp = "9.0.0"
 concurrentFuturesKtx = "1.3.0"
-kotlin = "2.3.0"
+kotlin = "2.1.0"
 coreKtx = "1.17.0"
 kotlinxCoroutinesPlayServices = "1.10.2"
 lifecycleKtx = "2.10.0"
-activityCompose = "1.12.3"
-composeBom = "2026.01.01"
-hilt = "2.59"
+activityCompose = "1.12.4"
+composeBom = "2026.02.00"
+hilt = "2.59.1"
 hiltNavigationCompose = "1.3.0"
 cameraX = "1.5.3"
 materialIconsExtended = "1.7.8"
 objectDetection = "17.0.2"
-paging = "3.4.0"
+paging = "3.4.1"
 glide = "5.0.5"
 glideCompose = "1.0.0-beta08"
 mlKitFace = "16.1.7"
 mlKitPose = "18.0.0-beta5"
 mlKitSubject = "16.0.0-beta1"
-room = "2.6.1"
-ksp = "2.0.0-1.0.21"
+
+ksp = "2.1.0-1.0.29"
 material = "1.13.0"
-foundationLayout = "1.10.2"
+foundationLayout = "1.10.3"
 tensorflowLiteTaskVision = "0.4.4"
-uiGraphics = "1.10.2"
-foundation = "1.10.2"
+uiGraphics = "1.10.3"
+foundation = "1.10.3"
 playServicesAdsApi = "24.9.0"
 googleServices = "4.4.4"
 firebaseCrashlyticsPlugin = "3.0.6"
 firebaseBom = "34.9.0" # BOM을 쓰면 라이브러리 버전 호환성 고민 끝!
+# ... 기존 버전들 ...
+room = "2.8.4"
+workManager = "2.11.1"
+hiltWork = "1.3.0"
+imageLabelingDefaultCommon = "17.0.9"
+translate = "17.0.3"
+
 [libraries]
 # Core & UI
 androidx-compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -76,6 +83,19 @@ play-services-ads-api = { group = "com.google.android.gms", name = "play-service
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+
+# Room (DB)
+androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+
+# WorkManager (백그라운드 작업)
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
+androidx-hilt-work = { group = "androidx.hilt", name = "hilt-work", version.ref = "hiltWork" }
+androidx-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version.ref = "hiltWork" }
+image-labeling-default-common = { group = "com.google.mlkit", name = "image-labeling", version.ref = "imageLabelingDefaultCommon" }
+translate = { group = "com.google.mlkit", name = "translate", version.ref = "translate" }
+
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 # 라이브러리 모듈을 안 쓸 거라면 아래 줄은 없어도 됩니다.
