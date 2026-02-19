@@ -1,34 +1,25 @@
 package com.genius.shot.presentation.gallery.viewmodel
 
-import android.app.RecoverableSecurityException
 import android.content.IntentSender
-import android.os.Build
-import android.text.format.DateUtils
-import androidx.annotation.RequiresApi
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.insertSeparators
 import androidx.paging.map
-import com.genius.shot.data.repository.GalleryRepository
 import com.genius.shot.domain.model.GalleryItem
 import com.genius.shot.domain.model.ImageItem
 import com.genius.shot.domain.usecase.DeleteImageUseCase
 import com.genius.shot.domain.usecase.ImageLoadUseCase
 import com.genius.shot.domain.usecase.NotifyDataChangeUseCase
 import com.genius.shot.domain.usecase.ObserveGalleryDataUseCase
+import com.genius.shot.domain.usecase.SearchImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -41,49 +32,103 @@ class GalleryViewModel @Inject constructor(
     private val observeGalleryDataUseCase: ObserveGalleryDataUseCase,
     private val deleteImageUseCase: DeleteImageUseCase,
     private val notifyDataChangeUseCase: NotifyDataChangeUseCase,
-) : ViewModel(){
+    private val searchImageUseCase: SearchImageUseCase
+) : ViewModel() {
 
-    val galleryData: Flow<PagingData<GalleryItem>> = imageLoadUseCase()
+    // 1. 일반 갤러리 데이터 (Paging)
+    val galleryData = imageLoadUseCase()
         .map { pagingData ->
             pagingData.map { GalleryItem.Image(it) }
-        }
-        .map { pagingData ->
-            pagingData.insertSeparators { before, after ->
-                shouldAddSeparator(before, after)
-            }
+                .insertSeparators { before: GalleryItem.Image?, after: GalleryItem.Image? ->
+                    if (after == null) return@insertSeparators null
+
+                    val beforeTime = before?.item?.dateTaken ?: return@insertSeparators GalleryItem.DateHeader(
+                        formatDate(after.item.dateTaken)
+                    )
+
+                    val afterTime = after.item.dateTaken
+                    if (formatDate(beforeTime) != formatDate(afterTime)) {
+                        GalleryItem.DateHeader(formatDate(afterTime))
+                    } else {
+                        null
+                    }
+                }
         }
         .cachedIn(viewModelScope)
 
-    private val _selectedItems = MutableStateFlow<Set<ImageItem>>(setOf())
-    val selectedItems: StateFlow<Set<ImageItem>> = _selectedItems.asStateFlow()
+    // 2. 검색 결과 (DB에서 List로 가져옴)
+    private val _searchResults = MutableStateFlow<List<GalleryItem.Image>>(emptyList())
+    val searchResults = _searchResults.asStateFlow()
 
-    // ✨ UI에 "팝업 띄워줘"라고 요청할 채널
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
+
+    private val _isSearching = MutableStateFlow(false)
+    val isSearching = _isSearching.asStateFlow()
+
+    private var searchJob: Job? = null
+
+    // 3. 선택 모드 상태
+    private val _selectedItems = MutableStateFlow<Set<ImageItem>>(emptySet())
+    val selectedItems = _selectedItems.asStateFlow()
+
+    // 4. 이벤트 (권한 요청, 새로고침 등)
     private val _permissionNeededEvent = Channel<IntentSender>()
     val permissionNeededEvent = _permissionNeededEvent.receiveAsFlow()
 
     private val _refreshEvent = Channel<Unit>()
     val refreshEvent = _refreshEvent.receiveAsFlow()
 
-    val isSelectionMode: Boolean
-        get() = _selectedItems.value.isNotEmpty()
-
-
     init {
+        // 데이터 변경 감지 (삭제 등 발생 시)
         viewModelScope.launch {
             observeGalleryDataUseCase().collect {
                 _refreshEvent.send(Unit)
+                // 검색 중이었다면 검색 결과도 갱신
+                if (_searchQuery.value.isNotEmpty()) {
+                    onSearch()
+                }
             }
         }
     }
 
-    fun toggleSelection(item: ImageItem) {
-        _selectedItems.update { currentSet ->
-            if (currentSet.contains(item)) {
-                currentSet - item
-            } else {
-                currentSet + item
+    // --- 검색 로직 ---
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+        if (query.isEmpty()) {
+            _searchResults.value = emptyList()
+        }
+    }
+
+    fun onSearch() {
+        val query = _searchQuery.value
+        if (query.isBlank()) return
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            _isSearching.value = true
+            try {
+                // DB 검색 호출 (UseCase)
+                val results = searchImageUseCase(query)
+                _searchResults.value = results
+            } catch (e: Exception) {
+                e.printStackTrace()
+                _searchResults.value = emptyList()
+            } finally {
+                _isSearching.value = false
             }
         }
+    }
+
+    // --- 선택 & 삭제 로직 ---
+    fun toggleSelection(item: ImageItem) {
+        val currentSelection = _selectedItems.value.toMutableSet()
+        if (currentSelection.contains(item)) {
+            currentSelection.remove(item)
+        } else {
+            currentSelection.add(item)
+        }
+        _selectedItems.value = currentSelection
     }
 
     fun clearSelection() {
@@ -91,67 +136,29 @@ class GalleryViewModel @Inject constructor(
     }
 
     fun deleteSelectedItems() {
-
         viewModelScope.launch {
             val itemsToDelete = _selectedItems.value.toList()
             if (itemsToDelete.isEmpty()) return@launch
 
-            val uris = itemsToDelete.map { it.uri }
-
             try {
-                // minSdk 32이므로 무조건 createDeleteRequest 사용 가능!
+                val uris = itemsToDelete.map { it.uri }
                 val intentSender = deleteImageUseCase(uris)
                 _permissionNeededEvent.send(intentSender)
             } catch (e: Exception) {
                 e.printStackTrace()
-                // 혹시 모를 에러 처리
             }
         }
     }
 
-    // ✨ [수정] 권한 획득 후 로직도 단순화
-    // createDeleteRequest는 "허용" 누르는 순간 시스템이 삭제함 -> UI만 갱신
     fun onDeletePermissionGranted() {
-        clearSelection()
         viewModelScope.launch {
             notifyDataChangeUseCase()
+            clearSelection()
         }
     }
 
-    private fun shouldAddSeparator(
-        before: GalleryItem.Image?,
-        after: GalleryItem.Image?
-    ): GalleryItem.DateHeader? {
-        if(after == null) return null
-
-        val afterDateStr = getPrettyDateString(after.item.dateTaken)
-
-        if (before == null) {
-            return GalleryItem.DateHeader(afterDateStr)
-        }
-
-        val beforeDateStr = getPrettyDateString(before.item.dateTaken)
-
-        return if (beforeDateStr != afterDateStr) {
-            GalleryItem.DateHeader(afterDateStr)
-        } else {
-            null
-        }
-    }
-
-    // ✨ 예쁜 날짜 문자열 생성 함수
-    private fun getPrettyDateString(timestamp: Long): String {
-        val now = System.currentTimeMillis()
-
-        // Android DateUtils를 쓰면 "오늘", "어제" 처리가 아주 쉽습니다.
-        return if (DateUtils.isToday(timestamp)) {
-            "오늘"
-        } else if (DateUtils.isToday(timestamp + DateUtils.DAY_IN_MILLIS)) {
-            "어제"
-        } else {
-            // 그 외: "2월 4일 (수)" 형태
-            val dateFormat = SimpleDateFormat("M월 d일 (E)", Locale.KOREA)
-            dateFormat.format(Date(timestamp))
-        }
+    private fun formatDate(dateMillis: Long): String {
+        val formatter = SimpleDateFormat("yyyy년 MM월 dd일", Locale.KOREAN)
+        return formatter.format(Date(dateMillis))
     }
 }
